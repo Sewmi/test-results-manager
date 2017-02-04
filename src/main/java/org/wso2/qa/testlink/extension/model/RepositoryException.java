@@ -7,6 +7,5 @@ public class RepositoryException extends Throwable {
 
     public RepositoryException(String message, Throwable e) {
         super(message, e);
-
     }
 }
