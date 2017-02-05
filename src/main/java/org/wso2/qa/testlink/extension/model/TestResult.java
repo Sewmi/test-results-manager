@@ -70,4 +70,17 @@ public class TestResult {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return "TestResult{" +
+                "product='" + product + '\'' +
+                ", version='" + version + '\'' +
+                ", buildNo=" + buildNo +
+                ", platform='" + platform + '\'' +
+                ", testMethod='" + testMethod + '\'' +
+                ", timestamp='" + timestamp + '\'' +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }

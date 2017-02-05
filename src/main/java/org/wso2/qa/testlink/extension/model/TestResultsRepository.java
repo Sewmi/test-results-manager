@@ -1,16 +1,16 @@
 package org.wso2.qa.testlink.extension.model;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Represents the test results database which is populated at the end of a Jenkins build.
  */
 public class TestResultsRepository {
 
-    public ArrayList<TestResult> getResults() throws RepositoryException {
-
-        ArrayList<TestResult> testResults = new ArrayList<TestResult>();
+    public HashMap<String, TestResult> getResults() throws RepositoryException {
+        
+        HashMap<String, TestResult> testResults = new HashMap<String, TestResult>();
 
         try{
             // Loading MySQL JDBC driver.
@@ -36,6 +36,7 @@ public class TestResultsRepository {
             //Extracting data from the result set
             while(resultSet.next()){
                 TestResult testResult = new TestResult();
+
                 testResult.setProduct(resultSet.getString("product"));
                 testResult.setVersion(resultSet.getString("version"));
                 testResult.setPlatform(resultSet.getString("platform"));
@@ -44,9 +45,8 @@ public class TestResultsRepository {
                 testResult.setStatus(resultSet.getString("status"));
                 testResult.setBuildNo(resultSet.getLong("buildNo"));
 
-                testResults.add(testResult);
+                testResults.put(testResult.getTestMethod(),testResult);
             }
-
 
         } catch (SQLException e) {
             //TODO Log this exception
