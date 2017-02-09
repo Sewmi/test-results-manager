@@ -25,8 +25,6 @@ public class TestResultManagementServlet extends HttpServlet {
         TestResultsUpdater testResultsUpdater = new TestResultsUpdater(projectName, testPlanName,buildNo);
         testResultsUpdater.update();
 
-
-
         response.setContentType("application/json");
 
         // Respond with the update status.

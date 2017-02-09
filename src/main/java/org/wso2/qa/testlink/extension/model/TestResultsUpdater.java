@@ -2,7 +2,8 @@ package org.wso2.qa.testlink.extension.model;
 
 
 import br.eti.kinoshita.testlinkjavaapi.model.TestCase;
-import java.util.HashMap;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,20 +22,24 @@ public class TestResultsUpdater {
         this.buildNo = buildNo;
     }
 
-    public void update(){
+    public void update() {
 
         TestResultsRepository testResultsRepository = new TestResultsRepository();
         //TODO:GET clarified (couldn't use without initializing)
-        HashMap<String, TestResult> testResults = null;
+        Map<String, List<TestResult>> testResults = null;
 
         try {
-            testResults = testResultsRepository.getResults();
+            testResults = testResultsRepository.getResults(buildNo);
 
             //Printing each map entry in the hash map.
             //TODO : Remove below for loop. (added for testing purposes)
-            for (Map.Entry<String, TestResult> entry: testResults.entrySet()){
+            for (Map.Entry<String, List<TestResult>> entry : testResults.entrySet()) {
+                System.out.println("map key : " + entry.getKey());
 
-                System.out.println("map key : " + entry.getKey() + "map value : " + entry.getValue() );
+                for (int i = 0; i < (entry.getValue().size()); i++) {
+                    System.out.println(" \n List item " + (i + 1));
+                    System.out.println(entry.getValue().get(i));
+                }
             }
         } catch (RepositoryException e) {
             e.printStackTrace();
@@ -50,14 +55,14 @@ public class TestResultsUpdater {
             //TODO: Handle exception
             e.printStackTrace();
         }
-
-        //Create Processor object
-        Processor processor = new Processor(testResults,testCases);
-
-
-
-
-
-
     }
+
+    //Todo remove main method (added for testing purposes)
+    public static void main(String[] args) throws TestLinkException {
+
+        //TestCase[] testCases = new TestLinkClient("TestSamplePlan","TestSample", 1100).getTestCases();
+        TestResultsUpdater resultsUpdater = new TestResultsUpdater("TestSample", "TestSamplePlan", 1102);
+        resultsUpdater.update();
+    }
+
 }
