@@ -71,6 +71,7 @@ public class TestResult {
         this.status = status;
     }
 
+    //Overrriding toString method to print values inside result object instead of toString value given for object when printing hash map value.
     @Override
     public String toString() {
         return "TestResult{" +

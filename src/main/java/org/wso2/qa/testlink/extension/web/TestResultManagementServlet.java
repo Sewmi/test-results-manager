@@ -16,10 +16,16 @@ import java.io.PrintWriter;
 public class TestResultManagementServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        TestResultsUpdater testResultsUpdater = new TestResultsUpdater();
+        String projectName = request.getParameter("projectName");
+        String testPlanName = request.getParameter("testPlanName");
+        long buildNo = Long.parseLong(request.getParameter("buildNo"));
+
+        TestResultsUpdater testResultsUpdater = new TestResultsUpdater(projectName, testPlanName,buildNo);
         testResultsUpdater.update();
+
+
 
         response.setContentType("application/json");
 
