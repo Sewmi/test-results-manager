@@ -17,11 +17,22 @@ public class TestResult {
     private String timestamp;
     private String status;
 
+    public int getTestCaseId() {
+        return testCaseId;
+    }
+
+    public void setTestCaseId(int testCaseId) {
+        this.testCaseId = testCaseId;
+    }
+
+    private int testCaseId;
+
     public String getProduct() {
         return product;
     }
 
     public void setProduct(String product) {
+
         this.product = product;
     }
 
@@ -30,6 +41,7 @@ public class TestResult {
     }
 
     public void setVersion(String version) {
+
         this.version = version;
     }
 
@@ -38,6 +50,7 @@ public class TestResult {
     }
 
     public void setBuildNo(long buildNo) {
+
         this.buildNo = buildNo;
     }
 
@@ -46,6 +59,7 @@ public class TestResult {
     }
 
     public void setPlatform(String platform) {
+
         this.platform = platform;
     }
 
@@ -65,26 +79,12 @@ public class TestResult {
         this.timestamp = timestamp;
     }
 
-    public ExecutionStatus getStatus() {
-        ExecutionStatus executionStatus;
-        //Todo: Replace Pass/ Fail with actual statuses written into database (check whether there is a skip)
-        if (status=="PASS"){
-            executionStatus = ExecutionStatus.PASSED;
-            return executionStatus;
-        } else if(status=="FAIL"){
-            executionStatus = ExecutionStatus.FAILED;
-            return executionStatus;
-        }else {
-            executionStatus = ExecutionStatus.NOT_RUN;
-            return executionStatus;
-        }
-    }
+    public String getStatus() {return status;}
 
     public void setStatus(String status) {
         this.status = status;
     }
 
-    //Overrriding toString method to print values inside result object instead of toString value given for object when printing hash map value.
     @Override
     public String toString() {
         return "TestResult{" +
@@ -95,6 +95,8 @@ public class TestResult {
                 ", testMethod='" + testMethod + '\'' +
                 ", timestamp='" + timestamp + '\'' +
                 ", status='" + status + '\'' +
+                ", testCaseId=" + testCaseId +
                 '}';
     }
+
 }

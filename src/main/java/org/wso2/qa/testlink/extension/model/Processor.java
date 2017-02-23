@@ -1,6 +1,7 @@
 package org.wso2.qa.testlink.extension.model;
 
 import br.eti.kinoshita.testlinkjavaapi.model.TestCase;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,27 +21,30 @@ public class Processor {
     }
 
 
-    public List<ExecutionResult> getProcessedResults() {
-        List <ExecutionResult> testCasesWithResults = new ArrayList<ExecutionResult>();
+    public List<TestResult> getProcessedResults() {
+        List <TestResult> testCasesWithResults = new ArrayList<TestResult>();
 
         for(TestCase testCase : testCases){
 
             // null check
-            if ((testCase.getCustomFields()!= null)&(testCase.getCustomFields().get(0).getValue()!=null)){
+            if(testCase!= null && !(ArrayUtils.isEmpty(testCase.getCustomFields().toArray()))){
+
                 String testMethod = testCase.getCustomFields().get(0).getValue();
 
-                if (!(testResults.get(testCase.getCustomFields().get(0).getValue())).isEmpty()){
+                if (!(testResults.get(testMethod)).isEmpty()){
                     // iterate list for each
                     for (int i=0; i < (testResults.get(testMethod)).size();i++ ){
-                        ExecutionResult executionResult = new ExecutionResult();
+                        TestResult executionResult = new TestResult();
                         executionResult.setTestCaseId(testCase.getId());
                         executionResult.setPlatform(testResults.get(testMethod).get(i).getPlatform());
-                        executionResult.setExecutionStatus(testResults.get(testMethod).get(i).getStatus());
+                        executionResult.setStatus(testResults.get(testMethod).get(i).getStatus());
                         testCasesWithResults.add(executionResult);
-                        System.out.println("=== testCasesWithResults added for" + i + "==== \n");
+
                     }
 
                 }
+            }else {
+                System.out.println("No test cases available for mapping");
             }
 
         }

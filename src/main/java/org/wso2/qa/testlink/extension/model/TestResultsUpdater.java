@@ -56,14 +56,14 @@ public class TestResultsUpdater {
             e.printStackTrace();
         }
 
-        // Get
+        // G
         Processor processor = new Processor(testResults,testCases);
         // updated test cases
-        List <ExecutionResult> testCasesWithResults = new ArrayList<ExecutionResult>();
-        testCasesWithResults = processor.getProcessedResults();
+        List <TestResult> testResultList  = new ArrayList<TestResult>();
+        testResultList = processor.getProcessedResults();
 
         //Todo To be removed : Added to print test execution object arrayList
-        for (ExecutionResult executionResult : testCasesWithResults){
+        for (TestResult executionResult : testResultList){
             System.out.println("ExecutionResult : " + executionResult.toString() + "\n" );
         }
     }
