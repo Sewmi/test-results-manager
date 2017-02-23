@@ -12,3 +12,4 @@ buildNumber.properties
 .idea/
 *.iml
 /redeployApp.sh
+/TestResultManager_SampleRequest.txt

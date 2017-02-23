@@ -3,6 +3,7 @@ package org.wso2.qa.testlink.extension.model;
 
 import br.eti.kinoshita.testlinkjavaapi.model.TestCase;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,6 @@ public class TestResultsUpdater {
 
         TestLinkClient testLinkClient = new TestLinkClient(testPlanName, projectName, buildNo);
 
-        //TODO:GET clarified (couldn't use without initializing)
         TestCase[] testCases = new TestCase[0];
         try {
             testCases = testLinkClient.getTestCases();
@@ -55,13 +55,24 @@ public class TestResultsUpdater {
             //TODO: Handle exception
             e.printStackTrace();
         }
+
+        // Get
+        Processor processor = new Processor(testResults,testCases);
+        // updated test cases
+        List <ExecutionResult> testCasesWithResults = new ArrayList<ExecutionResult>();
+        testCasesWithResults = processor.getProcessedResults();
+
+        //Todo To be removed : Added to print test execution object arrayList
+        for (ExecutionResult executionResult : testCasesWithResults){
+            System.out.println("ExecutionResult : " + executionResult.toString() + "\n" );
+        }
     }
 
     //Todo remove main method (added for testing purposes)
     public static void main(String[] args) throws TestLinkException {
 
         //TestCase[] testCases = new TestLinkClient("TestSamplePlan","TestSample", 1100).getTestCases();
-        TestResultsUpdater resultsUpdater = new TestResultsUpdater("TestSample", "TestSamplePlan", 1102);
+        TestResultsUpdater resultsUpdater = new TestResultsUpdater("TestSample", "samplePlan1", 1110);
         resultsUpdater.update();
     }
 

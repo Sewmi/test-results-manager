@@ -1,5 +1,7 @@
 package org.wso2.qa.testlink.extension.model;
 
+import br.eti.kinoshita.testlinkjavaapi.constants.ExecutionStatus;
+
 import java.util.Date;
 
 /**
@@ -63,8 +65,19 @@ public class TestResult {
         this.timestamp = timestamp;
     }
 
-    public String getStatus() {
-        return status;
+    public ExecutionStatus getStatus() {
+        ExecutionStatus executionStatus;
+        //Todo: Replace Pass/ Fail with actual statuses written into database (check whether there is a skip)
+        if (status=="PASS"){
+            executionStatus = ExecutionStatus.PASSED;
+            return executionStatus;
+        } else if(status=="FAIL"){
+            executionStatus = ExecutionStatus.FAILED;
+            return executionStatus;
+        }else {
+            executionStatus = ExecutionStatus.NOT_RUN;
+            return executionStatus;
+        }
     }
 
     public void setStatus(String status) {

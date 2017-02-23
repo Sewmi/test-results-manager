@@ -1,6 +1,7 @@
 package org.wso2.qa.testlink.extension.model;
 
 import br.eti.kinoshita.testlinkjavaapi.TestLinkAPI;
+import br.eti.kinoshita.testlinkjavaapi.constants.ExecutionStatus;
 import br.eti.kinoshita.testlinkjavaapi.constants.ExecutionType;
 import br.eti.kinoshita.testlinkjavaapi.constants.ResponseDetails;
 import br.eti.kinoshita.testlinkjavaapi.constants.TestCaseDetails;
@@ -75,7 +76,8 @@ public class TestLinkClient {
         TestProject testProject = api.getTestProjectByName(projectName);
 
         for (int i=0 ;i< automatedTestCases.length ;i++){
-            System.out.println("\n Array index : " + i);
+            //Todo: remove ptint
+            //System.out.println("\n Array index : " + i);
 
             //Assign custom fields
             CustomField customField = api.getTestCaseCustomFieldDesignValue(
@@ -86,22 +88,45 @@ public class TestLinkClient {
                     "automationTestCase",
                     ResponseDetails.FULL);
 
-            //ToDo Print statements are to be removed (added for testing purposes)
+            //Adding a custom field to get custom field array.
             automatedTestCases[i].getCustomFields().add(customField);
+
+            //ToDo Print statements are to be removed (added for testing purposes)
+            /*
             System.out.println(" TestCase ID : " + automatedTestCases[i].getId());
             System.out.println("Test Case Name" + automatedTestCases[i].getName());
             System.out.println("getCustomFields : " + automatedTestCases[i].getCustomFields().get(0));
+            */
 
         }
 
+        //Todo: This is for testing perpusos.
+        /*
+        api.setTestCaseExecutionResult(automatedTestCases[0].getId(),
+                null,   //test case external id
+                testPlanID, // test plan id
+                ExecutionStatus.PASSED, // Executed status
+                buildID,        // build ID
+                Long.toString(buildID),  // Build name
+                null,
+                null,
+                null,
+                49,     // platform ID
+                null,
+                null,
+                null);
+        */
+
         return automatedTestCases;
+
     }
-    /* Todo: remove main method (added for testing purposes)
+    //Todo: remove main method (added for testing purposes)
+    /*
     public static void main(String[] args) throws TestLinkException {
 
 
-        TestCase[] testCases = new TestLinkClient("TestSamplePlan","TestSample", 1100).getTestCases();
+        TestCase[] testCases = new TestLinkClient("sewmiNewPlan","TestSample", 1107).getTestCases();
 
 
-    }*/
+    } */
 }
