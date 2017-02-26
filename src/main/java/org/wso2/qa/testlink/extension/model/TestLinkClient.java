@@ -11,6 +11,7 @@ import br.eti.kinoshita.testlinkjavaapi.util.TestLinkAPIException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 /**
  * To retrieve and manipulate test plans in TestLink.
@@ -31,10 +32,8 @@ public class TestLinkClient {
         this.buildNo = buildNo;
     }
 
-    // Returns array of test cases retrieve from a test plan
-    public TestCase[] getTestCases() throws TestLinkException {
-
-        //TODO: Read URL from a configuration file
+    public TestLinkAPI connectToTestLink() throws TestLinkException {
+        //TODO: Read URL, devkey from a configuration file
         String url = "http://192.168.48.112/lib/api/xmlrpc/v1/xmlrpc.php";
         String devKey = "314b1563861a71354bdfe5de96b91ff5";
         TestLinkAPI api = null;
@@ -52,6 +51,13 @@ public class TestLinkClient {
             throw new TestLinkException("Cannot connect to TestLink",e);
         }
 
+        return api;
+    }
+
+    // Returns array of test cases retrieve from a test plan
+    public TestCase[] getTestCases() throws TestLinkException{
+
+        TestLinkAPI api = connectToTestLink();
         TestPlan testplan = api.getTestPlanByName(testPlanName, projectName);
         testPlanID = testplan.getId();
 
@@ -118,6 +124,66 @@ public class TestLinkClient {
         */
 
         return automatedTestCases;
+
+    }
+
+    public ExecutionStatus convertToExecutionStatus(String status){
+
+        if (status.equals("PASS")) {
+            return ExecutionStatus.PASSED;
+
+        } else if (status.equals("FAIL")) {
+            return ExecutionStatus.FAILED;
+
+        } else {
+            return ExecutionStatus.NOT_RUN;
+        }
+    }
+
+    public int getPlatformByID(String platformName) throws TestLinkException {
+        TestLinkAPI api = connectToTestLink();
+        Platform[] platforms = new Platform[0];
+        platforms = api.getTestPlanPlatforms(testPlanID);
+
+        for (Platform platform : platforms ){
+            if (platform.getName() == platformName){
+                return platform.getId();
+            }
+        }
+
+        return 0;
+    }
+
+
+    public void updateTestExecution(List<TestResult> testResultList) throws TestLinkException {
+
+        List<TestResult> testResults = testResultList;
+        TestLinkAPI api = connectToTestLink();
+
+        for (TestResult testResult : testResults){
+
+            if (getPlatformByID(testResult.getPlatform())!=0){
+
+                api.setTestCaseExecutionResult(testResult.getTestCaseId(),
+                        null,   //test case external id
+                        testPlanID, // test plan id
+                        convertToExecutionStatus(testResult.getStatus()), // Executed status
+                        buildID,        // build ID
+                        Long.toString(buildID),  // Build name
+                        null,
+                        null,
+                        null,
+                        //getPlatformByID(testResult.getPlatform()),     // platform ID
+                        49,
+                        null,
+                        null,
+                        null);
+            }else{
+                //Todo This is for temporary error handling
+                System.out.println("No platform id found for :" + testResult.getPlatform() );
+            }
+
+        }
 
     }
     //Todo: remove main method (added for testing purposes)

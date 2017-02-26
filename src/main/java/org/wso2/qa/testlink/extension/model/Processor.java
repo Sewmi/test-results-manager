@@ -20,14 +20,15 @@ public class Processor {
         this.testCases = testCases;
     }
 
-
     public List<TestResult> getProcessedResults() {
         List <TestResult> testCasesWithResults = new ArrayList<TestResult>();
 
         for(TestCase testCase : testCases){
 
-            // null check
+            // TODO : Fix the possible NPE.
             if(testCase!= null && !(ArrayUtils.isEmpty(testCase.getCustomFields().toArray()))){
+
+
 
                 String testMethod = testCase.getCustomFields().get(0).getValue();
 
@@ -41,7 +42,6 @@ public class Processor {
                         testCasesWithResults.add(executionResult);
 
                     }
-
                 }
             }else {
                 System.out.println("No test cases available for mapping");

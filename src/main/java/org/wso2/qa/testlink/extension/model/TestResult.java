@@ -7,6 +7,7 @@ import java.util.Date;
 /**
  * Represents a test result of a test case.
  */
+
 public class TestResult {
 
     private String product;
@@ -16,6 +17,7 @@ public class TestResult {
     private String testMethod;
     private String timestamp;
     private String status;
+    private int testCaseId;
 
     public int getTestCaseId() {
         return testCaseId;
@@ -24,8 +26,6 @@ public class TestResult {
     public void setTestCaseId(int testCaseId) {
         this.testCaseId = testCaseId;
     }
-
-    private int testCaseId;
 
     public String getProduct() {
         return product;

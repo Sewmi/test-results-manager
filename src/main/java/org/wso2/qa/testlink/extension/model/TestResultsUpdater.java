@@ -56,14 +56,20 @@ public class TestResultsUpdater {
             e.printStackTrace();
         }
 
-        // G
         Processor processor = new Processor(testResults,testCases);
         // updated test cases
-        List <TestResult> testResultList  = new ArrayList<TestResult>();
-        testResultList = processor.getProcessedResults();
+        List <TestResult> updatedTestResults  = new ArrayList<TestResult>();
+        updatedTestResults = processor.getProcessedResults();
+
+        try {
+            testLinkClient.updateTestExecution(updatedTestResults);
+        } catch (TestLinkException e) {
+            e.printStackTrace();
+        }
+
 
         //Todo To be removed : Added to print test execution object arrayList
-        for (TestResult executionResult : testResultList){
+        for (TestResult executionResult : updatedTestResults){
             System.out.println("ExecutionResult : " + executionResult.toString() + "\n" );
         }
     }
@@ -71,7 +77,6 @@ public class TestResultsUpdater {
     //Todo remove main method (added for testing purposes)
     public static void main(String[] args) throws TestLinkException {
 
-        //TestCase[] testCases = new TestLinkClient("TestSamplePlan","TestSample", 1100).getTestCases();
         TestResultsUpdater resultsUpdater = new TestResultsUpdater("TestSample", "samplePlan1", 1110);
         resultsUpdater.update();
     }
