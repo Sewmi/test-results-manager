@@ -28,18 +28,18 @@ public class Processor {
             // TODO : Fix the possible NPE.
             if(testCase!= null && !(ArrayUtils.isEmpty(testCase.getCustomFields().toArray()))){
 
+                String testMethod = getIntegrationTestMethodName(testCase);
 
+                List<TestResult> testResultsForPlatforms = this.testResults.get(testMethod);
 
-                String testMethod = testCase.getCustomFields().get(0).getValue();
+                if (!testResultsForPlatforms.isEmpty()){
 
-                if (!(testResults.get(testMethod)).isEmpty()){
-                    // iterate list for each
-                    for (int i=0; i < (testResults.get(testMethod)).size();i++ ){
-                        TestResult executionResult = new TestResult();
-                        executionResult.setTestCaseId(testCase.getId());
-                        executionResult.setPlatform(testResults.get(testMethod).get(i).getPlatform());
-                        executionResult.setStatus(testResults.get(testMethod).get(i).getStatus());
-                        testCasesWithResults.add(executionResult);
+                    for (TestResult result : testResultsForPlatforms ){
+
+                        result.setTestCaseId(testCase.getId());
+                        result.setPlatform(result.getPlatform());
+                        result.setStatus(result.getStatus());
+                        testCasesWithResults.add(result);
 
                     }
                 }
@@ -50,5 +50,10 @@ public class Processor {
         }
 
         return testCasesWithResults;
+    }
+
+    private String getIntegrationTestMethodName(TestCase testCase) {
+        // TODO : Get the custom field name by name rather than getting the first element of the list.
+        return testCase.getCustomFields().get(0).getValue();
     }
 }

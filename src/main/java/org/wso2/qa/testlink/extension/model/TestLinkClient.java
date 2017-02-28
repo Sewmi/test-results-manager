@@ -23,13 +23,26 @@ public class TestLinkClient {
     private String testPlanName;
     private long buildNo;
     private int buildID;
-    private  int testPlanID;
 
-    public TestLinkClient(String testPlanName, String projectName, long buildNo) {
+    private TestLinkAPI testLinkAPI;
+    TestPlan testPlan;
+    private Platform[] platforms;
+
+    public TestLinkClient(String testPlanName, String projectName, long buildNo) throws TestLinkException {
 
         this.testPlanName = testPlanName;
         this.projectName = projectName;
         this.buildNo = buildNo;
+        this.init();
+    }
+
+    public void init() throws TestLinkException {
+        // Connect to TestLink
+        testLinkAPI = connectToTestLink();
+
+        // Fetch master data
+        testPlan = testLinkAPI.getTestPlanByName(testPlanName, projectName);
+        platforms = testLinkAPI.getTestPlanPlatforms(testPlan.getId());
     }
 
     public TestLinkAPI connectToTestLink() throws TestLinkException {
@@ -57,16 +70,12 @@ public class TestLinkClient {
     // Returns array of test cases retrieve from a test plan
     public TestCase[] getTestCases() throws TestLinkException{
 
-        TestLinkAPI api = connectToTestLink();
-        TestPlan testplan = api.getTestPlanByName(testPlanName, projectName);
-        testPlanID = testplan.getId();
-
-        Build build = api.createBuild(testPlanID, Long.toString(buildNo), "Automatically Created by Test-Results-Manager.");
+        Build build = testLinkAPI.createBuild(testPlan.getId(), Long.toString(buildNo), "Automatically Created by Test-Results-Manager.");
         buildID = build.getId();
 
         //Get the list of automated test cases from the test plan
-        TestCase[] automatedTestCases = api.getTestCasesForTestPlan(
-                testPlanID,
+        TestCase[] automatedTestCases = testLinkAPI.getTestCasesForTestPlan(
+                testPlan.getId(),
                 null,       /* test cases IDs*/
                 buildID,    /* build ID */
                 null,       /* key words IDs */
@@ -79,14 +88,14 @@ public class TestLinkClient {
                 TestCaseDetails.FULL); /* Test case Detail */
 
 
-        TestProject testProject = api.getTestProjectByName(projectName);
+        TestProject testProject = testLinkAPI.getTestProjectByName(projectName);
 
         for (int i=0 ;i< automatedTestCases.length ;i++){
             //Todo: remove ptint
             //System.out.println("\n Array index : " + i);
 
             //Assign custom fields
-            CustomField customField = api.getTestCaseCustomFieldDesignValue(
+            CustomField customField = testLinkAPI.getTestCaseCustomFieldDesignValue(
                     automatedTestCases[i].getId(),
                     null, /* testCaseExternalId */
                     automatedTestCases[i].getVersion(),
@@ -127,7 +136,7 @@ public class TestLinkClient {
 
     }
 
-    public ExecutionStatus convertToExecutionStatus(String status){
+    private ExecutionStatus convertToExecutionStatus(String status){
 
         if (status.equals("PASS")) {
             return ExecutionStatus.PASSED;
@@ -135,23 +144,18 @@ public class TestLinkClient {
         } else if (status.equals("FAIL")) {
             return ExecutionStatus.FAILED;
 
-        } else {
+        }else{
             return ExecutionStatus.NOT_RUN;
         }
     }
 
-    public int getPlatformByID(String platformName) throws TestLinkException {
-        TestLinkAPI api = connectToTestLink();
-        Platform[] platforms = new Platform[0];
-        platforms = api.getTestPlanPlatforms(testPlanID);
-
-        for (Platform platform : platforms ){
-            if (platform.getName() == platformName){
+    public int getPlatformIdByName(String platformName) throws TestLinkException {
+        for (Platform platform : this.platforms ){
+            if (platform.getName().equals(platformName)){
                 return platform.getId();
             }
         }
-
-        return 0;
+        return -1;
     }
 
 
@@ -162,22 +166,26 @@ public class TestLinkClient {
 
         for (TestResult testResult : testResults){
 
-            if (getPlatformByID(testResult.getPlatform())!=0){
+            int platformId = getPlatformIdByName(testResult.getPlatform());
 
-                api.setTestCaseExecutionResult(testResult.getTestCaseId(),
-                        null,   //test case external id
-                        testPlanID, // test plan id
-                        convertToExecutionStatus(testResult.getStatus()), // Executed status
-                        buildID,        // build ID
-                        Long.toString(buildID),  // Build name
-                        null,
-                        null,
-                        null,
-                        //getPlatformByID(testResult.getPlatform()),     // platform ID
-                        49,
-                        null,
-                        null,
-                        null);
+            if (platformId != -1){
+
+                ExecutionStatus executionStatus = convertToExecutionStatus(testResult.getStatus());
+                if(!executionStatus.equals(ExecutionStatus.NOT_RUN)){
+                    ReportTCResultResponse response = api.setTestCaseExecutionResult(testResult.getTestCaseId(),
+                            null,   //test case external id
+                            testPlan.getId(), // test plan id
+                            executionStatus, // Executed status
+                            buildID,        // build ID
+                            Long.toString(buildID),  // Build name
+                            null,
+                            null,
+                            null,
+                            platformId,
+                            null,
+                            null,
+                            null);
+                }
             }else{
                 //Todo This is for temporary error handling
                 System.out.println("No platform id found for :" + testResult.getPlatform() );

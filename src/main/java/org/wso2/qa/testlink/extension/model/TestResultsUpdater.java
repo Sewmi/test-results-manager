@@ -46,7 +46,12 @@ public class TestResultsUpdater {
             e.printStackTrace();
         }
 
-        TestLinkClient testLinkClient = new TestLinkClient(testPlanName, projectName, buildNo);
+        TestLinkClient testLinkClient = null;
+        try {
+            testLinkClient = new TestLinkClient(testPlanName, projectName, buildNo);
+        } catch (TestLinkException e) {
+            e.printStackTrace();
+        }
 
         TestCase[] testCases = new TestCase[0];
         try {
@@ -58,12 +63,12 @@ public class TestResultsUpdater {
 
         Processor processor = new Processor(testResults,testCases);
         // updated test cases
-        List <TestResult> updatedTestResults  = new ArrayList<TestResult>();
-        updatedTestResults = processor.getProcessedResults();
+        List <TestResult> updatedTestResults  =  processor.getProcessedResults();
 
         try {
             testLinkClient.updateTestExecution(updatedTestResults);
         } catch (TestLinkException e) {
+            // TODO : Handle this exception
             e.printStackTrace();
         }
 
@@ -77,7 +82,7 @@ public class TestResultsUpdater {
     //Todo remove main method (added for testing purposes)
     public static void main(String[] args) throws TestLinkException {
 
-        TestResultsUpdater resultsUpdater = new TestResultsUpdater("TestSample", "samplePlan1", 1110);
+        TestResultsUpdater resultsUpdater = new TestResultsUpdater("TestSample", "samplePlan1", 1111);
         resultsUpdater.update();
     }
 
