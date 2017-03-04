@@ -15,12 +15,14 @@ public class TestResultsUpdater {
     private String projectName;
     private String testPlanName;
     private long buildNo;
+    private  List<CarbonComponent> carbonComponents = new ArrayList<CarbonComponent>();
 
-    public TestResultsUpdater(String projectName, String testPlanName, long buildNo) {
+    public TestResultsUpdater(String projectName, String testPlanName, long buildNo, List<CarbonComponent> carbonComponents) {
 
         this.projectName = projectName;
         this.testPlanName = testPlanName;
         this.buildNo = buildNo;
+        this.carbonComponents = carbonComponents;
     }
 
     public void update() {
@@ -82,7 +84,7 @@ public class TestResultsUpdater {
     //Todo remove main method (added for testing purposes)
     public static void main(String[] args) throws TestLinkException {
 
-        TestResultsUpdater resultsUpdater = new TestResultsUpdater("TestSample", "samplePlan1", 1111);
+        TestResultsUpdater resultsUpdater = new TestResultsUpdater("TestSample", "samplePlan1", 1111, new ArrayList<CarbonComponent>());
         resultsUpdater.update();
     }
 
