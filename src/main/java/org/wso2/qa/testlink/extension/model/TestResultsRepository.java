@@ -25,7 +25,7 @@ public class TestResultsRepository {
         }
 
         Connection connection = null;
-        String connectionURL = "jdbc:mysql://localhost:3306/test_data";
+        String connectionURL = "jdbc:mysql://localhost:3306/test_results";
         String databaseUsername = "root";
         String databasePassword = "root";
 

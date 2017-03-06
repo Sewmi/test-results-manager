@@ -80,10 +80,18 @@ public class Processor {
                 }else{
                     String[] integrationTestMethods = integrationTestMethodFieldValue.split(",");
 
+                    // We need to keep the overall unit test result to make sure that ,
+                    // every platform result evaluation start with the same unit test result.
+                    String unitTestOverallRestStatus = overallResultStatus;
                     boolean isTestResultForPlatformAvailable;
 
                     for (Platform platform : platforms){
+
+                        // Init few flags for the new platform result evaluation.
                         isTestResultForPlatformAvailable = false;
+                        overallResultStatus = unitTestOverallRestStatus;
+
+                        outerloop:
                         for (String integrationTestMethod : integrationTestMethods){
                             //If the test result method is not blank
                             if(StringUtils.isNotBlank(integrationTestMethod)){
@@ -94,15 +102,13 @@ public class Processor {
                                             overallResultStatus = testResult.getStatus();
                                         }
                                         if (testResult.getStatus().equals(Constants.FAIL)){
-                                            break;
+                                            break outerloop;
                                         }
                                     }
                                 }
-
                             }
-
                         }
-                        //Update test Result
+                        //Update the platform result, if there are test cases available for the platform.
                         if (isTestResultForPlatformAvailable){
                             TestResult result = new TestResult();
                             result.setPlatform(platform.getName());
@@ -110,28 +116,12 @@ public class Processor {
                             result.setTestCaseId(testCase.getId());
                             testCasesWithResults.add(result);
                         }
-
                     }
                 }
-
-
-
-
-
-                // Get the overall result for each platform for integration tests.
-                // Derive the final overall result (unit tests + integration tests)for the test case for the platform.
-                // Update test case for result for the platform
-
-                // Adding test result into the list only if there are no integration tests mapped.
-
-
-
-
             }else {
                 System.out.println("No test cases available for mapping");
             }
         }
-
         return testCasesWithResults;
     }
 

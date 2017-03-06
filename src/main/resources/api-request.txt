@@ -1,0 +1,1 @@
+GET http://localhost:8080/test-results-manager/update?projectName=TestSample&testPlanName=resultManagerPlan01&buildNo=1004&components=-org.wso2.am:org.wso2.am.compenent1:jar:9.9:compile-org.wso2.carbon.identity.user.ws:org.wso2.am.compenent2:jar:1.0.0:compile-org.wso2.carbon:org.wso2.am.compenent3:jar:2.0.0:compile
