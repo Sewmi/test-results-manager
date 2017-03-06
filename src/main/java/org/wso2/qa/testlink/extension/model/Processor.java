@@ -1,7 +1,9 @@
 package org.wso2.qa.testlink.extension.model;
 
+import br.eti.kinoshita.testlinkjavaapi.model.CustomField;
+import br.eti.kinoshita.testlinkjavaapi.model.Platform;
 import br.eti.kinoshita.testlinkjavaapi.model.TestCase;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,50 +12,154 @@ import java.util.Map;
 /**
  * Set test execution status in each test case, based on the results
  */
+
 public class Processor {
 
     private  Map<String, List<TestResult>> testResults = null;
-    private  TestCase[] testCases = new TestCase[0];
+    private  TestCase[] testCases = null;
+    private  Platform[] platforms = null;
 
-    public Processor(Map<String, List<TestResult>> testResults, TestCase[] testCases) {
+    public Processor(Map<String, List<TestResult>> testResults, TestCase[] testCases, Platform[] platforms) {
         this.testResults = testResults;
         this.testCases = testCases;
+        this.platforms = platforms;
     }
 
     public List<TestResult> getProcessedResults() {
+
         List <TestResult> testCasesWithResults = new ArrayList<TestResult>();
 
         for(TestCase testCase : testCases){
+            if(testCase != null && testCase.getCustomFields() != null && !testCase.getCustomFields().isEmpty()){
 
-            // TODO : Fix the possible NPE.
-            if(testCase!= null && !(ArrayUtils.isEmpty(testCase.getCustomFields().toArray()))){
+                String unitTestMethodFieldValue = getUnitTestMethodFieldValue(testCase);
+                String integrationTestMethodFieldValue = getIntegrationTestMethodName(testCase);
 
-                String testMethod = getIntegrationTestMethodName(testCase);
+                boolean areIntegrationTestsAvailable = areIntegrationTestsAvailable(integrationTestMethodFieldValue);
+                boolean areUnitTestsAvailable = areUnitTestsAvailable(unitTestMethodFieldValue);
 
-                List<TestResult> testResultsForPlatforms = this.testResults.get(testMethod);
+                // If either unit test or integration test are not available do not process this test case.
+                if(!areIntegrationTestsAvailable && !areUnitTestsAvailable){
+                    continue;
+                }
 
-                if (!testResultsForPlatforms.isEmpty()){
+                String overallResultStatus = Constants.PASS;
 
-                    for (TestResult result : testResultsForPlatforms ){
+                //Find overall result for unit test
+                if(areUnitTestsAvailable){
 
-                        result.setTestCaseId(testCase.getId());
-                        result.setPlatform(result.getPlatform());
-                        result.setStatus(result.getStatus());
-                        testCasesWithResults.add(result);
+                    String[] unitTestMethods = unitTestMethodFieldValue.split(",");
+
+                    for (String unitTestMethod : unitTestMethods ){
+
+                        List<TestResult> unitTestResults = testResults.get(unitTestMethod);
+                        if(unitTestResults != null && !unitTestResults.isEmpty()){
+
+                            if(!(unitTestResults.get(0).getStatus().equals(Constants.PASS))){
+                                overallResultStatus = unitTestResults.get(0).getStatus();
+                            }
+                            if (unitTestResults.get(0).getStatus().equals(Constants.FAIL)){
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Now we have the overall test result for unit tests, or "PASSED" if there are no unit tests..
+
+                // If there are no integration tests available, update the test case with the current overall result, only for "not-specified" platform
+                if(!areIntegrationTestsAvailable){
+                    TestResult result = new TestResult();
+                    result.setPlatform("NOT_SPECIFIED");
+                    result.setTestCaseId(testCase.getId());
+                    result.setStatus(overallResultStatus);
+                    testCasesWithResults.add(result);
+
+                    // Do not proceed.
+                    continue;
+                }else{
+                    String[] integrationTestMethods = integrationTestMethodFieldValue.split(",");
+
+                    boolean isTestResultForPlatformAvailable;
+
+                    for (Platform platform : platforms){
+                        isTestResultForPlatformAvailable = false;
+                        for (String integrationTestMethod : integrationTestMethods){
+                            //If the test result method is not blank
+                            if(StringUtils.isNotBlank(integrationTestMethod)){
+                                for (TestResult testResult : testResults.get(integrationTestMethod)){
+                                    if (platform.getName().equals(testResult.getPlatform())){
+                                        isTestResultForPlatformAvailable = true;
+                                        if(!testResult.getStatus().equals(Constants.PASS)){
+                                            overallResultStatus = testResult.getStatus();
+                                        }
+                                        if (testResult.getStatus().equals(Constants.FAIL)){
+                                            break;
+                                        }
+                                    }
+                                }
+
+                            }
+
+                        }
+                        //Update test Result
+                        if (isTestResultForPlatformAvailable){
+                            TestResult result = new TestResult();
+                            result.setPlatform(platform.getName());
+                            result.setStatus(overallResultStatus);
+                            result.setTestCaseId(testCase.getId());
+                            testCasesWithResults.add(result);
+                        }
 
                     }
                 }
+
+
+
+
+
+                // Get the overall result for each platform for integration tests.
+                // Derive the final overall result (unit tests + integration tests)for the test case for the platform.
+                // Update test case for result for the platform
+
+                // Adding test result into the list only if there are no integration tests mapped.
+
+
+
+
             }else {
                 System.out.println("No test cases available for mapping");
             }
-
         }
 
         return testCasesWithResults;
     }
 
+    private boolean areIntegrationTestsAvailable(String integrationTestMethodFieldValue) {
+        return StringUtils.isNotBlank(integrationTestMethodFieldValue);
+    }
+
+    private boolean areUnitTestsAvailable(String unitTestMethodFieldValue) {
+        return StringUtils.isNotBlank(unitTestMethodFieldValue);
+    }
+
+    private String getUnitTestMethodFieldValue(TestCase testCase) {
+
+        for (CustomField customField : testCase.getCustomFields()){
+            if (Constants.CUSTOM_FIELD_UNIT_TEST.equals(customField.getName())){
+                return customField.getValue();
+            }
+        }
+        return null;
+    }
+
     private String getIntegrationTestMethodName(TestCase testCase) {
-        // TODO : Get the custom field name by name rather than getting the first element of the list.
-        return testCase.getCustomFields().get(0).getValue();
+
+        for (CustomField customField : testCase.getCustomFields()){
+            if (Constants.CUSTOM_FIELD_INTEGRATION_TEST.equals(customField.getName())){
+                return customField.getValue();
+            }
+        }
+        return null;
     }
 }

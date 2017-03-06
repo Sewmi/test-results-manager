@@ -1,7 +1,7 @@
 package org.wso2.qa.testlink.extension.model;
 
 /**
- * Store carbon component information that is needed when querying testResultRepository.
+ * Stores carbon component information.
  */
 
 public class CarbonComponent {

@@ -1,6 +1,7 @@
 package org.wso2.qa.testlink.extension.model;
 
 
+import br.eti.kinoshita.testlinkjavaapi.model.Platform;
 import br.eti.kinoshita.testlinkjavaapi.model.TestCase;
 
 import java.util.ArrayList;
@@ -25,27 +26,17 @@ public class TestResultsUpdater {
         this.carbonComponents = carbonComponents;
     }
 
-    public void update() {
+    public void update() throws TestResultsManagerException {
 
         TestResultsRepository testResultsRepository = new TestResultsRepository();
-        //TODO:GET clarified (couldn't use without initializing)
+
         Map<String, List<TestResult>> testResults = null;
 
         try {
-            testResults = testResultsRepository.getResults(buildNo);
+            testResults = testResultsRepository.getResults(buildNo,carbonComponents);
 
-            //Printing each map entry in the hash map.
-            //TODO : Remove below for loop. (added for testing purposes)
-            for (Map.Entry<String, List<TestResult>> entry : testResults.entrySet()) {
-                System.out.println("map key : " + entry.getKey());
-
-                for (int i = 0; i < (entry.getValue().size()); i++) {
-                    System.out.println(" \n List item " + (i + 1));
-                    System.out.println(entry.getValue().get(i));
-                }
-            }
         } catch (RepositoryException e) {
-            e.printStackTrace();
+            throw new TestResultsManagerException("Cannot fetch test results from the repository", e);
         }
 
         TestLinkClient testLinkClient = null;
@@ -55,7 +46,7 @@ public class TestResultsUpdater {
             e.printStackTrace();
         }
 
-        TestCase[] testCases = new TestCase[0];
+        TestCase[] testCases = null;
         try {
             testCases = testLinkClient.getTestCases();
         } catch (TestLinkException e) {
@@ -63,7 +54,8 @@ public class TestResultsUpdater {
             e.printStackTrace();
         }
 
-        Processor processor = new Processor(testResults,testCases);
+        Platform[] platforms = testLinkClient.getPlatforms();
+        Processor processor = new Processor(testResults,testCases,platforms);
         // updated test cases
         List <TestResult> updatedTestResults  =  processor.getProcessedResults();
 
@@ -80,12 +72,4 @@ public class TestResultsUpdater {
             System.out.println("ExecutionResult : " + executionResult.toString() + "\n" );
         }
     }
-
-    //Todo remove main method (added for testing purposes)
-    public static void main(String[] args) throws TestLinkException {
-
-        TestResultsUpdater resultsUpdater = new TestResultsUpdater("TestSample", "samplePlan1", 1111, new ArrayList<CarbonComponent>());
-        resultsUpdater.update();
-    }
-
 }

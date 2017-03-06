@@ -5,7 +5,7 @@ import java.net.MalformedURLException;
 /**
  * Created by sewmini on 2/8/17.
  */
-public class TestLinkException extends Throwable {
+public class TestLinkException extends Exception {
 
     public TestLinkException(String message, Throwable e) {
         super(message,e);

@@ -1,6 +1,8 @@
 package org.wso2.qa.testlink.extension.web;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.qa.testlink.extension.model.CarbonComponent;
+import org.wso2.qa.testlink.extension.model.TestResultsManagerException;
 import org.wso2.qa.testlink.extension.model.TestResultsUpdater;
 
 import javax.servlet.ServletException;
@@ -31,13 +33,21 @@ public class TestResultManagementServlet extends HttpServlet {
         String[] componentInfo;
 
         for (String dependency : dependencies ){
-            componentInfo = dependency.split(":");
-            CarbonComponent carbonComponent = new CarbonComponent(componentInfo[1],componentInfo[3]);
-            carbonComponents.add(carbonComponent)  ;
+            if(StringUtils.isNotBlank(dependency)){
+                componentInfo = dependency.split(":");
+                CarbonComponent carbonComponent = new CarbonComponent(componentInfo[1],componentInfo[3]);
+                carbonComponents.add(carbonComponent);
+            }
         }
 
         TestResultsUpdater testResultsUpdater = new TestResultsUpdater(projectName, testPlanName,buildNo, carbonComponents);
-        testResultsUpdater.update();
+        try {
+            testResultsUpdater.update();
+        } catch (TestResultsManagerException e) {
+            e.printStackTrace();
+            response.sendError(500, e.getMessage());
+
+        }
 
         response.setContentType("application/json");
 

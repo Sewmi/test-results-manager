@@ -10,56 +10,16 @@ import java.util.Date;
 
 public class TestResult {
 
-    private String product;
-    private String version;
-    private long buildNo;
     private String platform;
     private String testMethod;
-    private String timestamp;
     private String status;
     private int testCaseId;
-
-    public int getTestCaseId() {
-        return testCaseId;
-    }
-
-    public void setTestCaseId(int testCaseId) {
-        this.testCaseId = testCaseId;
-    }
-
-    public String getProduct() {
-        return product;
-    }
-
-    public void setProduct(String product) {
-
-        this.product = product;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-
-        this.version = version;
-    }
-
-    public long getBuildNo() {
-        return buildNo;
-    }
-
-    public void setBuildNo(long buildNo) {
-
-        this.buildNo = buildNo;
-    }
 
     public String getPlatform() {
         return platform;
     }
 
     public void setPlatform(String platform) {
-
         this.platform = platform;
     }
 
@@ -71,29 +31,27 @@ public class TestResult {
         this.testMethod = testMethod;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public String getStatus() {
+        return status;
     }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String getStatus() {return status;}
 
     public void setStatus(String status) {
         this.status = status;
     }
 
+    public int getTestCaseId() {
+        return testCaseId;
+    }
+
+    public void setTestCaseId(int testCaseId) {
+        this.testCaseId = testCaseId;
+    }
+
     @Override
     public String toString() {
         return "TestResult{" +
-                "product='" + product + '\'' +
-                ", version='" + version + '\'' +
-                ", buildNo=" + buildNo +
                 ", platform='" + platform + '\'' +
                 ", testMethod='" + testMethod + '\'' +
-                ", timestamp='" + timestamp + '\'' +
                 ", status='" + status + '\'' +
                 ", testCaseId=" + testCaseId +
                 '}';

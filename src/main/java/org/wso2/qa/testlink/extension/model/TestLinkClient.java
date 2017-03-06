@@ -25,7 +25,7 @@ public class TestLinkClient {
     private int buildID;
 
     private TestLinkAPI testLinkAPI;
-    TestPlan testPlan;
+    private TestPlan testPlan;
     private Platform[] platforms;
 
     public TestLinkClient(String testPlanName, String projectName, long buildNo) throws TestLinkException {
@@ -36,48 +36,14 @@ public class TestLinkClient {
         this.init();
     }
 
-    public void init() throws TestLinkException {
-        // Connect to TestLink
-        testLinkAPI = connectToTestLink();
-
-        // Fetch master data
-        testPlan = testLinkAPI.getTestPlanByName(testPlanName, projectName);
-        platforms = testLinkAPI.getTestPlanPlatforms(testPlan.getId());
-    }
-
-    public TestLinkAPI connectToTestLink() throws TestLinkException {
-        //TODO: Read URL, devkey from a configuration file
-        String url = "http://192.168.48.112/lib/api/xmlrpc/v1/xmlrpc.php";
-        String devKey = "314b1563861a71354bdfe5de96b91ff5";
-        TestLinkAPI api = null;
-
-        URL testlinkURL = null;
-
-        try     {
-            testlinkURL = new URL(url);
-            api = new TestLinkAPI(testlinkURL, devKey);
-        } catch ( MalformedURLException e )   {
-            //TODO Log this exception (MalformedURLException)
-            throw new TestLinkException("TestLink connection URL is incorrect", e);
-        } catch( TestLinkAPIException e) {
-            //TODO Log this exception (TestLinkAPIException)
-            throw new TestLinkException("Cannot connect to TestLink",e);
-        }
-
-        return api;
-    }
-
     // Returns array of test cases retrieve from a test plan
     public TestCase[] getTestCases() throws TestLinkException{
-
-        Build build = testLinkAPI.createBuild(testPlan.getId(), Long.toString(buildNo), "Automatically Created by Test-Results-Manager.");
-        buildID = build.getId();
 
         //Get the list of automated test cases from the test plan
         TestCase[] automatedTestCases = testLinkAPI.getTestCasesForTestPlan(
                 testPlan.getId(),
                 null,       /* test cases IDs*/
-                buildID,    /* build ID */
+                null,    /* build ID */
                 null,       /* key words IDs */
                 null,   /* Key words */
                 false,  /* executed */
@@ -87,80 +53,47 @@ public class TestLinkClient {
                 false,                  /*get step info */
                 TestCaseDetails.FULL); /* Test case Detail */
 
-
         TestProject testProject = testLinkAPI.getTestProjectByName(projectName);
 
-        for (int i=0 ;i< automatedTestCases.length ;i++){
-            //Todo: remove ptint
-            //System.out.println("\n Array index : " + i);
 
-            //Assign custom fields
-            CustomField customField = testLinkAPI.getTestCaseCustomFieldDesignValue(
-                    automatedTestCases[i].getId(),
+        // NOTE : TestLink API doesn't add custom fields to the test cases when querying.
+        //        So we need to do another API call to fetch those.
+
+        for (TestCase automatedTestCase: automatedTestCases){
+            CustomField customFieldForIntegrationTestMethods = testLinkAPI.getTestCaseCustomFieldDesignValue(
+                    automatedTestCase.getId(),
                     null, /* testCaseExternalId */
-                    automatedTestCases[i].getVersion(),
+                    automatedTestCase.getVersion(),
                     testProject.getId(),
-                    "automationTestCase",
+                    Constants.CUSTOM_FIELD_INTEGRATION_TEST,
                     ResponseDetails.FULL);
 
-            //Adding a custom field to get custom field array.
-            automatedTestCases[i].getCustomFields().add(customField);
+            //Adding the custom for integration tests.
+            automatedTestCase.getCustomFields().add(customFieldForIntegrationTestMethods);
 
-            //ToDo Print statements are to be removed (added for testing purposes)
-            /*
-            System.out.println(" TestCase ID : " + automatedTestCases[i].getId());
-            System.out.println("Test Case Name" + automatedTestCases[i].getName());
-            System.out.println("getCustomFields : " + automatedTestCases[i].getCustomFields().get(0));
-            */
+            CustomField customFieldForUnitTestMethods = testLinkAPI.getTestCaseCustomFieldDesignValue(
+                    automatedTestCase.getId(),
+                    null, /* testCaseExternalId */
+                    automatedTestCase.getVersion(),
+                    testProject.getId(),
+                    Constants.CUSTOM_FIELD_UNIT_TEST,
+                    ResponseDetails.FULL);
+
+            //Adding the custom field for unit tests.
+            automatedTestCase.getCustomFields().add(customFieldForUnitTestMethods);
 
         }
-
-        //Todo: This is for testing perpusos.
-        /*
-        api.setTestCaseExecutionResult(automatedTestCases[0].getId(),
-                null,   //test case external id
-                testPlanID, // test plan id
-                ExecutionStatus.PASSED, // Executed status
-                buildID,        // build ID
-                Long.toString(buildID),  // Build name
-                null,
-                null,
-                null,
-                49,     // platform ID
-                null,
-                null,
-                null);
-        */
 
         return automatedTestCases;
-
     }
 
-    private ExecutionStatus convertToExecutionStatus(String status){
-
-        if (status.equals("PASS")) {
-            return ExecutionStatus.PASSED;
-
-        } else if (status.equals("FAIL")) {
-            return ExecutionStatus.FAILED;
-
-        }else{
-            return ExecutionStatus.NOT_RUN;
-        }
+    public Platform[] getPlatforms(){
+        return platforms;
     }
-
-    public int getPlatformIdByName(String platformName) throws TestLinkException {
-        for (Platform platform : this.platforms ){
-            if (platform.getName().equals(platformName)){
-                return platform.getId();
-            }
-        }
-        return -1;
-    }
-
 
     public void updateTestExecution(List<TestResult> testResultList) throws TestLinkException {
 
+        createBuild();
         List<TestResult> testResults = testResultList;
         TestLinkAPI api = connectToTestLink();
 
@@ -190,17 +123,63 @@ public class TestLinkClient {
                 //Todo This is for temporary error handling
                 System.out.println("No platform id found for :" + testResult.getPlatform() );
             }
+        }
+    }
 
+    private void init() throws TestLinkException {
+        testLinkAPI = connectToTestLink();
+        // Fetch master data
+        testPlan = testLinkAPI.getTestPlanByName(testPlanName, projectName);
+        platforms = testLinkAPI.getTestPlanPlatforms(testPlan.getId());
+    }
+
+    private TestLinkAPI connectToTestLink() throws TestLinkException {
+        //TODO: Read URL, devkey from a configuration file
+        String url = "http://192.168.48.112/lib/api/xmlrpc/v1/xmlrpc.php";
+        String devKey = "314b1563861a71354bdfe5de96b91ff5";
+        TestLinkAPI api = null;
+
+        URL testLinkURL = null;
+
+        try     {
+            testLinkURL = new URL(url);
+            api = new TestLinkAPI(testLinkURL, devKey);
+        } catch ( MalformedURLException e )   {
+            //TODO Log this exception (MalformedURLException)
+            throw new TestLinkException("TestLink connection URL is incorrect", e);
+        } catch( TestLinkAPIException e) {
+            //TODO Log this exception (TestLinkAPIException)
+            throw new TestLinkException("Cannot connect to TestLink",e);
         }
 
+        return api;
     }
-    //Todo: remove main method (added for testing purposes)
-    /*
-    public static void main(String[] args) throws TestLinkException {
 
+    private void createBuild() {
+        Build build = testLinkAPI.createBuild(testPlan.getId(), Long.toString(buildNo), "Automatically Created by Test-Results-Manager.");
+        buildID = build.getId();
+    }
 
-        TestCase[] testCases = new TestLinkClient("sewmiNewPlan","TestSample", 1107).getTestCases();
+    private ExecutionStatus convertToExecutionStatus(String status){
 
+        if (status.equals("PASS")) {
+            return ExecutionStatus.PASSED;
 
-    } */
+        } else if (status.equals("FAIL")) {
+            return ExecutionStatus.FAILED;
+
+        }else{
+            return ExecutionStatus.NOT_RUN;
+        }
+    }
+
+    private int getPlatformIdByName(String platformName) throws TestLinkException {
+
+        for (Platform platform : this.platforms ){
+            if (platform.getName().equals(platformName)){
+                return platform.getId();
+            }
+        }
+        return -1;
+    }
 }
