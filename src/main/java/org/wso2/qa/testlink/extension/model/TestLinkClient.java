@@ -138,7 +138,6 @@ public class TestLinkClient {
         String url = "http://192.168.48.112/lib/api/xmlrpc/v1/xmlrpc.php";
         String devKey = "314b1563861a71354bdfe5de96b91ff5";
         TestLinkAPI api = null;
-
         URL testLinkURL = null;
 
         try     {
@@ -151,7 +150,6 @@ public class TestLinkClient {
             //TODO Log this exception (TestLinkAPIException)
             throw new TestLinkException("Cannot connect to TestLink",e);
         }
-
         return api;
     }
 

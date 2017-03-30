@@ -13,3 +13,5 @@ buildNumber.properties
 *.iml
 /redeployApp.sh
 /TestResultManager_SampleRequest.txt
+!/src/main/resources/unit_testData.sql
+!/src/main/resources/integration_testsData.sql

@@ -11,6 +11,7 @@ import java.util.Map;
 /**
  * Reads test results from the database and update TestLink accordingly.
  */
+
 public class TestResultsUpdater {
 
     private String projectName;
@@ -65,7 +66,6 @@ public class TestResultsUpdater {
             // TODO : Handle this exception
             e.printStackTrace();
         }
-
 
         //Todo To be removed : Added to print test execution object arrayList
         for (TestResult executionResult : updatedTestResults){

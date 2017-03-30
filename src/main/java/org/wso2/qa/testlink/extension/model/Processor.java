@@ -91,7 +91,7 @@ public class Processor {
                         isTestResultForPlatformAvailable = false;
                         overallResultStatus = unitTestOverallRestStatus;
 
-                        outerloop:
+                        outerLoop:
                         for (String integrationTestMethod : integrationTestMethods){
                             //If the test result method is not blank
                             if(StringUtils.isNotBlank(integrationTestMethod)){
@@ -102,7 +102,7 @@ public class Processor {
                                             overallResultStatus = testResult.getStatus();
                                         }
                                         if (testResult.getStatus().equals(Constants.FAIL)){
-                                            break outerloop;
+                                            break outerLoop;
                                         }
                                     }
                                 }
