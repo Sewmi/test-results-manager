@@ -2,12 +2,14 @@ package org.wso2.qa.testlink.extension.model;
 
 import br.eti.kinoshita.testlinkjavaapi.TestLinkAPI;
 import br.eti.kinoshita.testlinkjavaapi.constants.ExecutionStatus;
-import br.eti.kinoshita.testlinkjavaapi.constants.ExecutionType;
 import br.eti.kinoshita.testlinkjavaapi.constants.ResponseDetails;
 import br.eti.kinoshita.testlinkjavaapi.constants.TestCaseDetails;
 import br.eti.kinoshita.testlinkjavaapi.model.*;
 import br.eti.kinoshita.testlinkjavaapi.model.TestPlan;
 import br.eti.kinoshita.testlinkjavaapi.util.TestLinkAPIException;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.digester.Digester;
+import org.apache.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,6 +20,8 @@ import java.util.List;
  */
 
 public class TestLinkClient {
+
+    private static final Logger LOGGER = Logger.getLogger(TestLinkClient.class);
 
     private String projectName;
     private String testPlanName;
@@ -40,7 +44,7 @@ public class TestLinkClient {
     public TestCase[] getTestCases() throws TestLinkException{
 
         //Get the list of automated test cases from the test plan
-        TestCase[] automatedTestCases = testLinkAPI.getTestCasesForTestPlan(
+        TestCase[] testCasesOfTestPlan = testLinkAPI.getTestCasesForTestPlan(
                 testPlan.getId(),
                 null,       /* test cases IDs*/
                 null,    /* build ID */
@@ -49,7 +53,7 @@ public class TestLinkClient {
                 false,  /* executed */
                 null,   /* assigned To */
                 null,   /* Executed status */
-                ExecutionType.AUTOMATED,
+                null,
                 false,                  /*get step info */
                 TestCaseDetails.FULL); /* Test case Detail */
 
@@ -58,14 +62,15 @@ public class TestLinkClient {
 
         // NOTE : TestLink API doesn't add custom fields to the test cases when querying.
         //        So we need to do another API call to fetch those.
-
-        for (TestCase automatedTestCase: automatedTestCases){
+        Configurations configurations = Configurations.getInstance();
+        for (TestCase automatedTestCase: testCasesOfTestPlan){
             CustomField customFieldForIntegrationTestMethods = testLinkAPI.getTestCaseCustomFieldDesignValue(
                     automatedTestCase.getId(),
                     null, /* testCaseExternalId */
                     automatedTestCase.getVersion(),
                     testProject.getId(),
-                    Constants.CUSTOM_FIELD_INTEGRATION_TEST,
+                    //Constants.CUSTOM_FIELD_INTEGRATION_TEST, todo remove
+                    configurations.getIntegrationTestCustomFieldName(),
                     ResponseDetails.FULL);
 
             //Adding the custom for integration tests.
@@ -76,7 +81,8 @@ public class TestLinkClient {
                     null, /* testCaseExternalId */
                     automatedTestCase.getVersion(),
                     testProject.getId(),
-                    Constants.CUSTOM_FIELD_UNIT_TEST,
+                    //Constants.CUSTOM_FIELD_UNIT_TEST, todo remove
+                    configurations.getUnitTestCustomFieldName(),
                     ResponseDetails.FULL);
 
             //Adding the custom field for unit tests.
@@ -84,7 +90,7 @@ public class TestLinkClient {
 
         }
 
-        return automatedTestCases;
+        return testCasesOfTestPlan;
     }
 
     public Platform[] getPlatforms(){
@@ -134,20 +140,22 @@ public class TestLinkClient {
     }
 
     private TestLinkAPI connectToTestLink() throws TestLinkException {
-        //TODO: Read URL, devkey from a configuration file
-        String url = "http://192.168.48.112/lib/api/xmlrpc/v1/xmlrpc.php";
-        String devKey = "314b1563861a71354bdfe5de96b91ff5";
+
+        Configurations configurations = Configurations.getInstance();
+
+        String url = configurations.getTestLinkAPIURL();
+        String devKey = configurations.getTestLinkAPIKey();
         TestLinkAPI api = null;
         URL testLinkURL = null;
 
         try     {
             testLinkURL = new URL(url);
+            LOGGER.debug(String.format("Connecting to TestLink. API URL : '%s', MD5 of the API key : '%s'", url, DigestUtils.md5(devKey)));
             api = new TestLinkAPI(testLinkURL, devKey);
+            LOGGER.debug("Connected to TestLink successfully.");
         } catch ( MalformedURLException e )   {
-            //TODO Log this exception (MalformedURLException)
             throw new TestLinkException("TestLink connection URL is incorrect", e);
         } catch( TestLinkAPIException e) {
-            //TODO Log this exception (TestLinkAPIException)
             throw new TestLinkException("Cannot connect to TestLink",e);
         }
         return api;

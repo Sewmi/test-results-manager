@@ -22,4 +22,11 @@ public class CarbonComponent {
         return componentVersion;
     }
 
+    @Override
+    public String toString() {
+        return "CarbonComponent{" +
+                "componentName='" + componentName + '\'' +
+                ", componentVersion='" + componentVersion + '\'' +
+                '}';
+    }
 }

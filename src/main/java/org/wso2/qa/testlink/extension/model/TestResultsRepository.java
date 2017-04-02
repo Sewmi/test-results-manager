@@ -1,6 +1,7 @@
 package org.wso2.qa.testlink.extension.model;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -8,26 +9,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// read configs.properties
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 /**
  * Represents the test results database which is populated at the end of a Jenkins build.
  */
 public class TestResultsRepository {
 
+    private final static Logger logger = Logger.getLogger(TestResultsRepository.class);
+
     public Map<String, List<TestResult>> getResults(long buildNo, List<CarbonComponent> carbonComponents) throws RepositoryException {
 
-        try {
+       try {
             // Loading MySQL JDBC driver.
             Class.forName("com.mysql.jdbc.Driver");
 
         } catch (ClassNotFoundException e) {
-            //TODO : log this exception
             throw new RepositoryException("Database driver could not be loaded", e);
         }
 
+        Configurations configurations = Configurations.getInstance();
+
         Connection connection = null;
-        String connectionURL = "jdbc:mysql://localhost:3306/test_results";
-        String databaseUsername = "root";
-        String databasePassword = "root";
+
+
+        String connectionURL = String.format("jdbc:mysql://%s:%s/%s",
+                configurations.getDatabaseHost(), configurations.getDatabasePort(), configurations.getDatabaseName());
+
+        String databaseUsername = configurations.getDatabaseUsername();
+        String databasePassword = configurations.getDatabasePassword();
 
         try {
             //Todo : Read database connection configurations from a config file
