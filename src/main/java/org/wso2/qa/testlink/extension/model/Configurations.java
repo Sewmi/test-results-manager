@@ -15,9 +15,11 @@ public class Configurations {
     private String databaseHost;
     private String databasePort;
     private String testLinkAPIURL;
-    private String unitTestCustomFieldName;
     private String testLinkAPIKey;
-    private String integrationTestCustomFieldName;
+    private String developerTestCustomFieldName;
+    private String systemTestCustomFieldName;
+    private String uiTestCustomFieldName;
+
 
     private Configurations() {
 
@@ -43,8 +45,9 @@ public class Configurations {
         databasePassword = properties.getProperty("resultsDatabase.password");
         testLinkAPIURL = properties.getProperty("testLink.APIURL");
         testLinkAPIKey = properties.getProperty("testLink.APIKey");
-        integrationTestCustomFieldName = properties.getProperty("testLink.integrationTestCustomField.name");
-        unitTestCustomFieldName = properties.getProperty("testLink.unitTestCustomField.name");
+        developerTestCustomFieldName = properties.getProperty("testlink.customField.test.dev");
+        systemTestCustomFieldName = properties.getProperty("testlink.customField.test.system");
+        uiTestCustomFieldName = properties.getProperty("testlink.customField.test.ui");
     }
 
     public String getDatabaseHost() {
@@ -80,10 +83,14 @@ public class Configurations {
     }
 
     public String getIntegrationTestCustomFieldName() {
-        return integrationTestCustomFieldName;
+        return systemTestCustomFieldName;
     }
 
     public String getUnitTestCustomFieldName() {
-        return unitTestCustomFieldName;
+        return developerTestCustomFieldName;
+    }
+
+    public String getUiTestCustomFieldName() {
+        return uiTestCustomFieldName;
     }
 }
