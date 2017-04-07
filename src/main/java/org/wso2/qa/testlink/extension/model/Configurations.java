@@ -15,20 +15,15 @@ public class Configurations {
     private String databaseHost;
     private String databasePort;
     private String testLinkAPIURL;
-    private String testLinkAPIKey;
-    private String integrationTestCustomFieldName;
     private String unitTestCustomFieldName;
     private String testLinkAPIKey;
     private String integrationTestCustomFieldName;
 
-    private Configurations(){
-    private String testLinkAPIKey;
-    private String integrationTestCustomFieldName;
-
+    private Configurations() {
 
     }
 
-    public static Configurations getInstance(){
+    public static Configurations getInstance() {
         if (instance == null) {
             synchronized (Configurations.class) {
                 if (instance == null) {
@@ -39,7 +34,7 @@ public class Configurations {
         return instance;
     }
 
-    public void init(Properties properties){
+    public void init(Properties properties) {
         databaseHost = properties.getProperty("resultsDatabase.host", "localhost");
         databasePort = properties.getProperty("resultsDatabase.port", "3306");
         databaseName = properties.getProperty("resultsDatabase.name");
