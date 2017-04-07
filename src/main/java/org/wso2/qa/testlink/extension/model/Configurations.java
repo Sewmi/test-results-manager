@@ -9,6 +9,7 @@ public class Configurations {
 
     private static Configurations instance;
     private String databaseName;
+    private String tableName;
     private String databaseUsername;
     private String databasePassword;
     private String databaseHost;
@@ -17,8 +18,12 @@ public class Configurations {
     private String testLinkAPIKey;
     private String integrationTestCustomFieldName;
     private String unitTestCustomFieldName;
+    private String testLinkAPIKey;
+    private String integrationTestCustomFieldName;
 
     private Configurations(){
+    private String testLinkAPIKey;
+    private String integrationTestCustomFieldName;
 
 
     }
@@ -38,6 +43,7 @@ public class Configurations {
         databaseHost = properties.getProperty("resultsDatabase.host", "localhost");
         databasePort = properties.getProperty("resultsDatabase.port", "3306");
         databaseName = properties.getProperty("resultsDatabase.name");
+        tableName = properties.getProperty("resultsDatabase.tableName");
         databaseUsername = properties.getProperty("resultsDatabase.username");
         databasePassword = properties.getProperty("resultsDatabase.password");
         testLinkAPIURL = properties.getProperty("testLink.APIURL");
@@ -56,6 +62,10 @@ public class Configurations {
 
     public String getDatabaseName() {
         return databaseName;
+    }
+
+    public String getTableName() {
+        return tableName;
     }
 
     public String getDatabaseUsername() {

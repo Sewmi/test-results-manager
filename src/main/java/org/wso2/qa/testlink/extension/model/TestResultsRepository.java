@@ -72,6 +72,7 @@ public class TestResultsRepository {
 
     private Map<String, List<TestResult>> getUnitTestResults(List<CarbonComponent> carbonComponents, Connection connection) throws SQLException {
 
+        Configurations configurations = Configurations.getInstance();
         Map<String, List<TestResult>> unitTestResults = new HashMap<String, List<TestResult>>();
 
         // Return if the components are not available.
@@ -85,7 +86,7 @@ public class TestResultsRepository {
 
         try {
 
-            String queryForPreparedStatement = "SELECT * FROM unit_tests WHERE (component,version) IN (%s)";
+            String queryForPreparedStatement = "SELECT * FROM " + configurations.getTableName() + " WHERE (component,version) IN (%s)";
 
             StringBuilder componentNameAndVersionParis = new StringBuilder();
 
@@ -144,6 +145,7 @@ public class TestResultsRepository {
 
     private Map<String, List<TestResult>> getIntegrationTestResults(long buildNo, Connection connection) throws SQLException {
 
+        Configurations configurations = Configurations.getInstance();
         Map<String, List<TestResult>> testResults = new HashMap<String, List<TestResult>>();
 
         PreparedStatement preparedStatement = null;
@@ -151,7 +153,7 @@ public class TestResultsRepository {
 
         try {
 
-            String queryForPreparedStatement = "SELECT * FROM integration_tests WHERE buildNo=?";
+            String queryForPreparedStatement = "SELECT * FROM " + configurations.getTableName() + " WHERE buildNo=?";
             preparedStatement = connection.prepareStatement(queryForPreparedStatement);
             preparedStatement.setLong(1, buildNo);
             resultSet = preparedStatement.executeQuery();
