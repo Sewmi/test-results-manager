@@ -9,21 +9,23 @@ public class Configurations {
 
     private static Configurations instance;
     private String databaseName;
+    private String tableName;
     private String databaseUsername;
     private String databasePassword;
     private String databaseHost;
     private String databasePort;
     private String testLinkAPIURL;
     private String testLinkAPIKey;
-    private String integrationTestCustomFieldName;
-    private String unitTestCustomFieldName;
+    private String developerTestCustomFieldName;
+    private String systemTestCustomFieldName;
+    private String uiTestCustomFieldName;
 
-    private Configurations(){
 
+    private Configurations() {
 
     }
 
-    public static Configurations getInstance(){
+    public static Configurations getInstance() {
         if (instance == null) {
             synchronized (Configurations.class) {
                 if (instance == null) {
@@ -34,16 +36,18 @@ public class Configurations {
         return instance;
     }
 
-    public void init(Properties properties){
+    public void init(Properties properties) {
         databaseHost = properties.getProperty("resultsDatabase.host", "localhost");
         databasePort = properties.getProperty("resultsDatabase.port", "3306");
         databaseName = properties.getProperty("resultsDatabase.name");
+        tableName = properties.getProperty("resultsDatabase.tableName");
         databaseUsername = properties.getProperty("resultsDatabase.username");
         databasePassword = properties.getProperty("resultsDatabase.password");
         testLinkAPIURL = properties.getProperty("testLink.APIURL");
         testLinkAPIKey = properties.getProperty("testLink.APIKey");
-        integrationTestCustomFieldName = properties.getProperty("testLink.integrationTestCustomField.name");
-        unitTestCustomFieldName = properties.getProperty("testLink.unitTestCustomField.name");
+        developerTestCustomFieldName = properties.getProperty("testlink.customField.test.dev");
+        systemTestCustomFieldName = properties.getProperty("testlink.customField.test.system");
+        uiTestCustomFieldName = properties.getProperty("testlink.customField.test.ui");
     }
 
     public String getDatabaseHost() {
@@ -56,6 +60,10 @@ public class Configurations {
 
     public String getDatabaseName() {
         return databaseName;
+    }
+
+    public String getTableName() {
+        return tableName;
     }
 
     public String getDatabaseUsername() {
@@ -75,10 +83,14 @@ public class Configurations {
     }
 
     public String getIntegrationTestCustomFieldName() {
-        return integrationTestCustomFieldName;
+        return systemTestCustomFieldName;
     }
 
     public String getUnitTestCustomFieldName() {
-        return unitTestCustomFieldName;
+        return developerTestCustomFieldName;
+    }
+
+    public String getUiTestCustomFieldName() {
+        return uiTestCustomFieldName;
     }
 }
