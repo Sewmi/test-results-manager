@@ -58,7 +58,7 @@ public class TestResultManagementServlet extends HttpServlet {
 
             List<CarbonComponent> carbonComponents = new ArrayList<CarbonComponent>();
 
-            String[] dependencies = componentsQueryParameterValue.split("-");
+            String[] dependencies = componentsQueryParameterValue.split("ZX78");
             String[] componentInfo;
 
             for (String dependency : dependencies ){
